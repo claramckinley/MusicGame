@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Sprites/note_frames.tres" type="SpriteFrames" id=1]
 [ext_resource path="res://Sprites/star.png" type="Texture" id=2]
@@ -7,9 +7,7 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 4, 4 )
 
-[node name="Note" type="Area2D" groups=[
-"note",
-]]
+[node name="Note" type="Area2D" groups=["note"]]
 script = ExtResource( 4 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
@@ -49,4 +47,5 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

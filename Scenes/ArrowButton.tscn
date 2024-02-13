@@ -33,3 +33,5 @@ shape = SubResource( 3 )
 [node name="PushTimer" type="Timer" parent="."]
 wait_time = 0.05
 one_shot = true
+
+[connection signal="timeout" from="PushTimer" to="." method="_on_PushTimer_timeout"]
