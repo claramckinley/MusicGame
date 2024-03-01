@@ -25,6 +25,7 @@ var lane = 0
 var rand = 0
 var note = load("res://Scenes/Note.tscn")
 var instance
+var http_req
 
 
 func _ready():
@@ -162,3 +163,76 @@ func increment_score(by):
 func reset_combo():
 	combo = 0
 	$Combo.text = ""
+
+
+var clientId = "35eb3120ba3841ddbc1b3cab8c573f80"
+var clientSecret = "8288717bc1004029b002cfe9bef7a50c"
+var code = null
+
+func _on_Button_pressed():
+	if code == null:
+		http_req = HTTPRequest.new()
+		add_child(http_req)
+		http_req.connect("request_completed", self, "_http_request_completed")
+#		get_auth()
+		get_access_to_account()
+	else:
+#		search_spotify($TextEdit.text)
+		play_spotify($TextEdit.text)
+			
+func get_auth():
+	var Client = HTTPClient.new()
+	var url = "https://accounts.spotify.com/api/token"
+	var auth = Marshalls.utf8_to_base64(clientId + ":" + clientSecret)
+	var headers = [
+		"Authorization: Basic " + auth,
+		"Content-Type: application/x-www-form-urlencoded"]
+	var body = {"grant_type":"client_credentials"}
+	http_req.request(url, headers, true, HTTPClient.METHOD_POST, Client.query_string_from_dict(body))
+	
+func get_access_to_account():
+	var Client = HTTPClient.new()
+	var url = "https://accounts.spotify.com/authorize?"
+	var auth = Marshalls.utf8_to_base64(clientId + ":" + clientSecret)
+	var headers = [
+		"Authorization: Basic " + auth,
+		"Content-Type: application/x-www-form-urlencoded"]
+	var body = {
+		"client_id":clientId,
+		"response_type":"code",
+		"redirect_uri":"http://localhost:8060/callback",
+		"scope":"user-read-private user-read-email"
+	}
+	http_req.request(url, headers, true, HTTPClient.METHOD_POST, Client.query_string_from_dict(body))
+	
+func search_spotify(search_query):
+	var Client = HTTPClient.new()
+	var url = "https://api.spotify.com/v1/search?" + "q=" + search_query + "&type=track&limit=10"
+	var headers = ["Authorization: Bearer " + code]
+	print(url)
+	http_req.request(url, headers, true, HTTPClient.METHOD_GET)
+	
+func play_spotify(search_query):
+	var Client = HTTPClient.new()
+	var url = "https://api.spotify.com/v1/me/player/play"
+	var headers = ["Authorization: Bearer " + code]
+	print(url)
+	var body = {"scope":"user-modify-playback-state user-read-playback-state"}
+	http_req.request(url, headers, true, HTTPClient.METHOD_PUT, Client.query_string_from_dict(body))
+
+
+func _http_request_completed(result, response_code, headers, body):
+	print("completed " + str(response_code))
+	if result == HTTPRequest.RESULT_SUCCESS:
+		if response_code == 200:
+			var json_string = body.get_string_from_utf8()
+			print(json_string)
+			$Label.text = json_string
+			var json_result = JSON.parse(json_string)
+			var variant = json_result.get_result()
+			code = variant.get("access_token")
+		else: 
+			print("http Error")
+#			print(headers)
+			print(body.get_string_from_utf8())
+			$Label.text = body.get_string_from_utf8()

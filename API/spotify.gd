@@ -1,6 +1,7 @@
 extends Node
 
 var clientId = "35eb3120ba3841ddbc1b3cab8c573f80"
+var clientSecret = "8288717bc1004029b002cfe9bef7a50c"
 var code = null
 
 var verifier = null
@@ -63,3 +64,7 @@ func getAccessToken(clientId, code):
 
 	var access_token= result.json();
 	return access_token;
+	
+	
+
+
